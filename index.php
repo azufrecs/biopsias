@@ -27,7 +27,7 @@ $CUENTA_NO_AGREGADOS = 0;
 /* Obteniendo lista de resultados */
 $RESULTADOS     = $mysqli->query("SELECT * FROM tbl_biopsias ORDER BY paciente");
 
-/* Procedimiento para importar excel a bd */ 
+/* Procedimiento para importar excel a bd */
 if (isset($_POST["import"])) {
     $allowedFileType = ['text/xlsx', 'text/xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
     if (in_array($_FILES["file"]["type"], $allowedFileType)) {
@@ -72,11 +72,11 @@ if (isset($_POST["import"])) {
             $MENSAJE = "<div class='alert alert-warning alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;El fichero que intenta importar no contiene la estructura esperada</div>";
         }
     } else {
-        $MENSAJE = "<div class='alert alert-danger alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;No ha seleccionado un archivo Excel con extensi&oacute;n XLSX. Por favor vuelva a intentarlo</div>";
+        $MENSAJE = "<div class='alert alert-primary alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;No ha seleccionado un archivo Excel con extensi&oacute;n XLSX. Por favor vuelva a intentarlo</div>";
     }
 }
 
-/* Procedimiento para exportar paciente a Word */ 
+/* Procedimiento para exportar paciente a Word */
 if (isset($_POST["export"])) {
     /* Limpiando directorio Exports */
     $DIRECTORIO = "exports/";
@@ -120,21 +120,21 @@ if (isset($_POST["export"])) {
     $templateWord->setValue("diagnostico", $piece_diagnostico);
     $templateWord->setValue("patologo", $piece_especialista);
 
-    $templateWord->saveAs("exports/". $piece_paciente.".docx");
+    $templateWord->saveAs("exports/" . $piece_paciente . ".docx");
 
     /* Guardamos el documento */
-    if (file_exists("exports/". $piece_paciente.".docx")) {
+    if (file_exists("exports/" . $piece_paciente . ".docx")) {
         header("Content-Description: File Transfer");
         header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        header("Content-Disposition: attachment; filename=" . basename("exports/". $piece_paciente.".docx"));
+        header("Content-Disposition: attachment; filename=" . basename("exports/" . $piece_paciente . ".docx"));
         header("Content-Transfer-Encoding: binary");
         header("Expires: 0");
         header("Cache-Control: must-revalidate");
         header("Pragma: public");
-        header("Content-Length: " . filesize("exports/". $piece_paciente.".docx"));
+        header("Content-Length: " . filesize("exports/" . $piece_paciente . ".docx"));
         ob_clean();
         flush();
-        readfile("exports/". $piece_paciente.".docx");
+        readfile("exports/" . $piece_paciente . ".docx");
         exit;
     } else {
         echo "Informe no disponible";
@@ -186,7 +186,7 @@ if (isset($_POST["export"])) {
                     <div align="center" style="font-size:10px">&nbsp;</div>
                     <div align="center"><i class="fas fa-file-excel fa-6x text-success"></i></div>
                     <div align="center" style="font-size:10px">&nbsp;</div>
-                    <div align="center" class="text-success" style="font-size:22px">Secci&oacute;n para importar fichero Excel con las Biopsias</div>
+                    <div align="center" class="text-success" style="font-size:22px">Secci&oacute;n para importar Biopsias en Excel</div>
                     <div class="card-body">
                         <form action='' method='post' name='frmExcelImport' id='frmExcelImport' enctype='multipart/form-data'>
                             <div class='row'>
@@ -203,11 +203,11 @@ if (isset($_POST["export"])) {
             </div>
 
             <div class="col-md-6">
-                <div class="card bg-danger-30 border-danger mb-3">
+                <div class="card bg-primary-30 border-primary mb-3">
                     <div align="center" style="font-size:10px">&nbsp;</div>
-                    <div align="center"><i class="fas fa-file-word fa-6x text-danger"></i></div>
+                    <div align="center"><i class="fas fa-file-word fa-6x text-primary"></i></div>
                     <div align="center" style="font-size:10px">&nbsp;</div>
-                    <div align="center" class="text-danger" style="font-size:22px">Secci&oacute;n un nombre para exportar informe a Word</div>
+                    <div align="center" class="text-primary" style="font-size:22px">Secci&oacute;n para exportar informes a Word</div>
                     <div class="card-body">
                         <form action='' method='post' name='frmExcelGenerateWord' id='frmExcelGenerateWord' enctype='multipart/form-data'>
                             <div class='row'>
@@ -222,7 +222,7 @@ if (isset($_POST["export"])) {
                                     </select>
                                 </div>
                                 <div class='col-md-4'>
-                                    <button type='submit' id='submit' name='export' class='btn btn-danger w-100'><i class='fas fa-file-import'></i>&nbsp;&nbsp;Exportar Word</button>
+                                    <button type='submit' id='submit' name='export' class='btn btn-primary w-100'><i class='fas fa-file-import'></i>&nbsp;&nbsp;Exportar Word</button>
                                 </div>
                             </div>
                         </form>
