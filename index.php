@@ -13,7 +13,7 @@ $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
 
 /* Limpiando el directorio de informes anteriores */
 $MENSAJE = "";
-$DIRECTORIO = "subidas/";
+$DIRECTORIO = "import/";
 $HANDLE = opendir($DIRECTORIO);
 while ($FILE = readdir($HANDLE)) {
     if ($FILE != "." && $FILE != ".." && $FILE != ".htaccess" && $FILE != ".gitkeep") {
@@ -31,7 +31,7 @@ $RESULTADOS     = $mysqli->query("SELECT * FROM tbl_biopsias ORDER BY paciente")
 if (isset($_POST["import"])) {
     $allowedFileType = ['text/xlsx', 'text/xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
     if (in_array($_FILES["file"]["type"], $allowedFileType)) {
-        $archivos = 'subidas/' . $_FILES['file']['name'];
+        $archivos = 'import/' . $_FILES['file']['name'];
         move_uploaded_file($_FILES['file']['tmp_name'], $archivos);
         $spreadsheet = $reader->load($archivos);
         $spreadsheet->setActiveSheetIndex(0);
@@ -187,6 +187,7 @@ if (isset($_POST["export"])) {
                     <div align="center"><i class="fas fa-file-excel fa-6x text-success"></i></div>
                     <div align="center" style="font-size:10px">&nbsp;</div>
                     <div align="center" class="text-success" style="font-size:22px">Secci&oacute;n para importar Biopsias en Excel</div>
+                    <div align="center" style="font-size:2px">&nbsp;</div>
                     <div class="card-body">
                         <form action='' method='post' name='frmExcelImport' id='frmExcelImport' enctype='multipart/form-data'>
                             <div class='row'>
@@ -208,6 +209,7 @@ if (isset($_POST["export"])) {
                     <div align="center"><i class="fas fa-file-word fa-6x text-primary"></i></div>
                     <div align="center" style="font-size:10px">&nbsp;</div>
                     <div align="center" class="text-primary" style="font-size:22px">Secci&oacute;n para exportar informes a Word</div>
+                    <div align="center" style="font-size:2px">&nbsp;</div>
                     <div class="card-body">
                         <form action='' method='post' name='frmExcelGenerateWord' id='frmExcelGenerateWord' enctype='multipart/form-data'>
                             <div class='row'>
@@ -237,7 +239,7 @@ if (isset($_POST["export"])) {
 
             <div id="footer">
                 <div class='col-md-12' align='center'>
-                    <a class='btn btn-sm btn-dark' href='https://www.onco.cmw.sld.cu' role='button'>Web ONCO</a>
+                    <a class='btn btn-sm btn-dark' href='class/security/exit.php' role='button'>Web ONCO</a>
                 </div>
             </div>
         </div>

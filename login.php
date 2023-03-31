@@ -121,7 +121,7 @@ if (isset($_POST['login'])) {
 
 	<div id="footer">
 		<div class='col-md-12' align='center'>
-			<a class='btn btn-sm btn-dark' href='https://www.onco.cmw.sld.cu' role='button'>Web ONCO</a>
+			<a class='btn btn-sm btn-dark' href='class/security/exit.php' role='button'>Web ONCO</a>
 		</div>
 	</div>
 </body>
