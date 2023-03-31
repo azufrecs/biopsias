@@ -72,7 +72,7 @@ if (isset($_POST["import"])) {
             $MENSAJE = "<div class='alert alert-warning alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;El fichero que intenta importar no contiene la estructura esperada</div>";
         }
     } else {
-        $MENSAJE = "<div class='alert alert-primary alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;No ha seleccionado un archivo Excel con extensi&oacute;n XLSX. Por favor vuelva a intentarlo</div>";
+        $MENSAJE = "<div class='alert alert-warning alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;No ha seleccionado un archivo Excel con extensi&oacute;n XLSX. Por favor vuelva a intentarlo</div>";
     }
 }
 
@@ -111,7 +111,7 @@ if (isset($_POST["export"])) {
     $templateWord->setValue("biopsia_original", $piece_boriginal);
     $templateWord->setValue("organo", $piece_organo);
     $templateWord->setValue("fecha_recepcion", $piece_frecep);
-    $templateWord->setValue("fecha_entrega", "--");
+    $templateWord->setValue("fecha_entrega", "-");
     $templateWord->setValue("nombre_paciente", $piece_paciente);
     $templateWord->setValue("cid_paciente", $piece_cid_paciente);
     $templateWord->setValue("hospital", $piece_hospital);
