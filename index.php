@@ -202,7 +202,7 @@ if (isset($_POST["export"])) {
                     <div align="center" style="font-size:10px">&nbsp;</div>
                     <div align="center"><i class="fas fa-file-excel fa-6x text-success"></i></div>
                     <div align="center" style="font-size:10px">&nbsp;</div>
-                    <div align="center" class="text-success" style="font-size:22px">Secci&oacute;n para importar Biopsias en Excel</div>
+                    <div align="center" class="text-success" style="font-size:22px">Secci&oacute;n para importar BD en Excel</div>
                     <div align="center" style="font-size:2px">&nbsp;</div>
                     <div class="card-body">
                         <form action='' method='post' name='frmExcelImport' id='frmExcelImport' enctype='multipart/form-data'>
@@ -224,7 +224,7 @@ if (isset($_POST["export"])) {
                     <div align="center" style="font-size:10px">&nbsp;</div>
                     <div align="center"><i class="fas fa-file-word fa-6x text-primary"></i></div>
                     <div align="center" style="font-size:10px">&nbsp;</div>
-                    <div align="center" class="text-primary" style="font-size:22px">Secci&oacute;n para exportar informes a Word</div>
+                    <div align="center" class="text-primary" style="font-size:22px">Secci&oacute;n para exportar Resultados a Word</div>
                     <div align="center" style="font-size:2px">&nbsp;</div>
                     <div class="card-body">
                         <form action='' method='post' name='frmExcelGenerateWord' id='frmExcelGenerateWord' enctype='multipart/form-data'>
