@@ -83,7 +83,7 @@ if (isset($_POST['login'])) {
 			$(".alert").fadeTo(500, 0).slideUp(500, function() {
 				$(this).remove();
 			});
-		}, 6000);
+		}, 3000);
 	</script>
 </head>
 
@@ -91,6 +91,7 @@ if (isset($_POST['login'])) {
 	<div class="container">
 		<div align="center">
 			<div class="row">
+				<div align="center" style="font-size:6.5px">&nbsp;</div>
 				<div class="col" align="center"><i style="font-size:230px" class="fas fa-microscope text-dark"></i></div>
 			</div>
 

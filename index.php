@@ -71,17 +71,17 @@ if (isset($_POST["import"])) {
                     break;
                 case 'paciente':
                     for ($n = 3; $n <= $numerofila; $n++) {
-                        $col_paciente[$n] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $n)->getValue();
+                        $col_paciente[$n] = empty($spreadsheet->getActiveSheet()->getCell($columnLetter . $n)->getValue()) ? "SIN NOMBRE DE PACIENTE" : $spreadsheet->getActiveSheet()->getCell($columnLetter . $n)->getValue();
                     }
                     break;
                 case 'hospital':
                     for ($o = 3; $o <= $numerofila; $o++) {
-                        $col_hospital[$o] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $o)->getValue();
+                        $col_hospital[$o] = empty($spreadsheet->getActiveSheet()->getCell($columnLetter . $o)->getValue()) ? "SIN HOSPITAL DEFINIDO" : $spreadsheet->getActiveSheet()->getCell($columnLetter . $o)->getValue();
                     }
                     break;
                 case 'diagnostico':
                     for ($p = 3; $p <= $numerofila; $p++) {
-                        $col_diagnostico[$p] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $p)->getValue();
+                        $col_diagnostico[$p] = empty($spreadsheet->getActiveSheet()->getCell($columnLetter . $p)->getValue()) ? "SIN DIAGNOSTICO DEFINIDO" : $spreadsheet->getActiveSheet()->getCell($columnLetter . $p)->getValue();
                     }
                     break;
             }
@@ -185,8 +185,10 @@ if (isset($_POST["export"])) {
         window.setTimeout(function() {
             $(".alert").fadeTo(500, 0).slideUp(500, function() {
                 $(this).remove();
+                window.location.href='/';
             });
-        }, 6000);
+        }, 3000);
+        
     </script>
 </head>
 
