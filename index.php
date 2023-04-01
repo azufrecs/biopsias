@@ -21,6 +21,14 @@ while ($FILE = readdir($HANDLE)) {
     }
 }
 
+$col_ano            = array();
+$col_noinforme      = array();
+$col_boriginal      = array();
+$col_organo         = array();
+$col_paciente       = array();
+$col_hospital       = array();
+$col_diagnostico    = array();
+
 $CUENTA_AGREGADOS = 0;
 $CUENTA_NO_AGREGADOS = 0;
 
@@ -37,40 +45,60 @@ if (isset($_POST["import"])) {
         $spreadsheet->setActiveSheetIndex(0);
         $numerofila = $spreadsheet->getActiveSheet()->getHighestRow();
 
-        $COMPROBACION1 = $spreadsheet->getActiveSheet()->getCell('B2')->getValue();
-        $COMPROBACION2 = $spreadsheet->getActiveSheet()->getCell('G2')->getValue();
-        $COMPROBACION3 = $spreadsheet->getActiveSheet()->getCell('L2')->getValue();
-        if ($COMPROBACION1 == "frecep" and $COMPROBACION2 == "organo" and $COMPROBACION3 == "diagnostico") {
-
-            for ($i = 3; $i <= $numerofila; $i++) {
-                $data_ano           = $spreadsheet->getActiveSheet()->getCell('A' . $i)->getValue();
-                $data_frecep        = $spreadsheet->getActiveSheet()->getCell('B' . $i)->getValue();
-                $data_noinforme     = $spreadsheet->getActiveSheet()->getCell('C' . $i)->getValue();
-                $data_boriginal     = $spreadsheet->getActiveSheet()->getCell('D' . $i)->getValue();
-                $data_laminas       = $spreadsheet->getActiveSheet()->getCell('E' . $i)->getValue();
-                $data_bloques       = $spreadsheet->getActiveSheet()->getCell('F' . $i)->getValue();
-                $data_organo        = $spreadsheet->getActiveSheet()->getCell('G' . $i)->getValue();
-                $data_paciente      = $spreadsheet->getActiveSheet()->getCell('H' . $i)->getValue();
-                $data_cid_paciente  = $spreadsheet->getActiveSheet()->getCell('I' . $i)->getValue();
-                $data_hospital      = $spreadsheet->getActiveSheet()->getCell('J' . $i)->getValue();
-                $data_provincia     = $spreadsheet->getActiveSheet()->getCell('K' . $i)->getValue();
-                $data_diagnostico   = $spreadsheet->getActiveSheet()->getCell('L' . $i)->getValue();
-                $data_especialista  = $spreadsheet->getActiveSheet()->getCell('M' . $i)->getValue();
-
-                $check = mysqli_query($mysqli, "SELECT * FROM tbl_biopsias WHERE frecep	 = '$data_frecep' AND boriginal = '$data_boriginal' AND organo = '$data_organo' AND paciente = '$data_paciente' AND diagnostico	= '$data_diagnostico' AND especialista = '$data_especialista'");
-
-                if (mysqli_num_rows($check) > 0) {
-                    $CUENTA_NO_AGREGADOS++;
-                } else {
-                    $resultados = mysqli_query($mysqli, "INSERT INTO tbl_biopsias(ano, frecep, noinforme, boriginal, laminas, bloques, organo, paciente, cid_paciente, hospital, provincia, diagnostico, especialista) VALUES('$data_ano', '$data_frecep', '$data_noinforme', '$data_boriginal', '$data_laminas', '$data_bloques', '$data_organo', '$data_paciente', '$data_cid_paciente', '$data_hospital', '$data_provincia', '$data_diagnostico', '$data_especialista')");
-                    $CUENTA_AGREGADOS++;
-                }
-
-                $MENSAJE = $MENSAJE = "<div class='alert alert-success alert-dismissible fade show' role='alert'><strong>¡Correcto!</strong>&nbsp;Excel procesado satisfactoriamente: " . $CUENTA_AGREGADOS . ' registros agregados de ' . $CUENTA_NO_AGREGADOS . "</div>";
+        /* Obteniendo los valores de filas en la columna correspondiente */
+        for ($i = 0; $i < 26; $i++) {
+            $columnLetter = chr($i + 65);
+            switch ($spreadsheet->getActiveSheet()->getCell($columnLetter . '2')->getValue()) {
+                case 'ano':
+                    for ($j = 3; $j <= $numerofila; $j++) {
+                        $col_ano[$j] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $j)->getValue();
+                    }
+                    break;
+                case 'noinforme':
+                    for ($k = 3; $k <= $numerofila; $k++) {
+                        $col_noinforme[$k] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $k)->getValue();
+                    }
+                    break;
+                case 'boriginal':
+                    for ($l = 3; $l <= $numerofila; $l++) {
+                        $col_boriginal[$l] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $l)->getValue();
+                    }
+                    break;
+                case 'organo':
+                    for ($m = 3; $m <= $numerofila; $m++) {
+                        $col_organo[$m] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $m)->getValue();
+                    }
+                    break;
+                case 'paciente':
+                    for ($n = 3; $n <= $numerofila; $n++) {
+                        $col_paciente[$n] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $n)->getValue();
+                    }
+                    break;
+                case 'hospital':
+                    for ($o = 3; $o <= $numerofila; $o++) {
+                        $col_hospital[$o] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $o)->getValue();
+                    }
+                    break;
+                case 'diagnostico':
+                    for ($p = 3; $p <= $numerofila; $p++) {
+                        $col_diagnostico[$p] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $p)->getValue();
+                    }
+                    break;
             }
-        } else {
-            $MENSAJE = "<div class='alert alert-warning alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;El fichero que intenta importar no contiene la estructura esperada</div>";
         }
+
+        /* Escribiendo en la BD los arrays en el orden correspondiente */
+        for ($q = 3; $q <= $numerofila; $q++) {
+            $check = mysqli_query($mysqli, "SELECT * FROM tbl_biopsias WHERE ano = '$col_ano[$q]' AND noinforme = '$col_noinforme[$q]' AND boriginal = '$col_boriginal[$q]' AND organo = '$col_organo[$q]' AND paciente = '$col_paciente[$q]' AND hospital = '$col_hospital[$q]' AND diagnostico = '$col_diagnostico[$q]'");
+
+            if (mysqli_num_rows($check) > 0) {
+                $CUENTA_NO_AGREGADOS++;
+            } else {
+                $resultados = mysqli_query($mysqli, "INSERT INTO tbl_biopsias(ano, noinforme, boriginal, organo, paciente, hospital, diagnostico) VALUES('$col_ano[$q]', '$col_noinforme[$q]', '$col_boriginal[$q]', '$col_organo[$q]', '$col_paciente[$q]', '$col_hospital[$q]', '$col_diagnostico[$q]')");
+                $CUENTA_AGREGADOS++;
+            }
+        }
+        $MENSAJE = "<div class='alert alert-success alert-dismissible fade show' role='alert'><strong>¡Correcto!</strong>&nbsp;Excel procesado satisfactoriamente: " . $CUENTA_AGREGADOS . ' registros agregados de ' . $numerofila - 2 . "</div>";
     } else {
         $MENSAJE = "<div class='alert alert-warning alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;No ha seleccionado un archivo Excel con extensi&oacute;n XLSX. Por favor vuelva a intentarlo</div>";
     }
@@ -93,32 +121,20 @@ if (isset($_POST["export"])) {
     $PACIENTE   = mysqli_real_escape_string($mysqli, (strip_tags(strtoupper($_POST["cboPaciente"]), ENT_QUOTES)));
     $pieces = explode("|", $PACIENTE);
     $piece_ano          = $pieces['0'];
-    $piece_frecep       = $pieces['1'];
-    $piece_noinforme    = $pieces['2'];
-    $piece_boriginal    = $pieces['3'];
-    $piece_laminas      = strlen($pieces['4']) > 0 ? $pieces['4'] : "-";
-    $piece_bloques      = strlen($pieces['5']) > 0 ? $pieces['5'] : "-";
-    $piece_organo       = $pieces['6'];
-    $piece_paciente     = $pieces['7'];
-    $piece_cid_paciente = strlen($pieces['8']) > 0 ? $pieces['8'] : "-";
-    $piece_hospital     = strlen($pieces['9']) > 0 ? $pieces['9'] : "-";
-    $piece_provincia    = strlen($pieces['10']) > 0 ? $pieces['10'] : "-";
-    $piece_diagnostico  = strlen($pieces['11']) > 0 ? $pieces['11'] : "-";
-    $piece_especialista = strlen($pieces['12']) > 0 ? $pieces['12'] : "-";
+    $piece_noinforme    = $pieces['1'];
+    $piece_boriginal    = $pieces['2'];
+    $piece_organo       = $pieces['3'];
+    $piece_paciente     = $pieces['4'];
+    $piece_hospital     = strlen($pieces['5']) > 0 ? $pieces['5'] : "-";
+    $piece_diagnostico  = $pieces['6'];
 
     /* Asignamos valores de las variables a la plantilla */
     $templateWord->setValue("biopsia_numero", "CR" . $piece_ano . $piece_noinforme);
     $templateWord->setValue("biopsia_original", $piece_boriginal);
     $templateWord->setValue("organo", $piece_organo);
-    $templateWord->setValue("fecha_recepcion", $piece_frecep);
-    $templateWord->setValue("fecha_entrega", "-");
     $templateWord->setValue("nombre_paciente", $piece_paciente);
-    $templateWord->setValue("cid_paciente", $piece_cid_paciente);
     $templateWord->setValue("hospital", $piece_hospital);
-    $templateWord->setValue("provincia", $piece_provincia);
-    $templateWord->setValue("material_recibido", $piece_laminas . " LAMINA(S), " .  $piece_bloques . " BLOQUE(S)");
     $templateWord->setValue("diagnostico", $piece_diagnostico);
-    $templateWord->setValue("patologo", $piece_especialista);
 
     $templateWord->saveAs("exports/" . $piece_paciente . ".docx");
 
@@ -151,7 +167,7 @@ if (isset($_POST["export"])) {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/img/favicon.svg">
-    <title>Informes Biopsias</title>
+    <title>Resultados de Biopsias</title>
 
     <!-- Enlazando el CSS de Bootstrap -->
     <link href="assets/css/bootstrap.css" rel="stylesheet" media="screen">
@@ -218,7 +234,7 @@ if (isset($_POST["export"])) {
                                         <option disabled value="" selected hidden>Seleccione el Paciente</option>
                                         <?php
                                         while ($rowResultados = $RESULTADOS->fetch_assoc()) {
-                                            echo "<option style='white-space:nowrap; text-overflow:elipsis; overflow:hidden;' value='" . $rowResultados['ano'] . "|" . $rowResultados['frecep'] . "|" . $rowResultados['noinforme'] . "|" . $rowResultados['boriginal'] . "|" . $rowResultados['laminas'] . "|" . $rowResultados['bloques'] . "|" . $rowResultados['organo'] . "|" . $rowResultados['paciente'] . "|" . $rowResultados['cid_paciente'] . "|" . $rowResultados['hospital'] . "|" . $rowResultados['provincia'] . "|" . $rowResultados['diagnostico'] . "|" . $rowResultados['especialista'] . "'>" . strtoupper($rowResultados['paciente'] . " (" . $rowResultados['frecep'] . ", " . $rowResultados['boriginal']) . ")</option>";
+                                            echo "<option style='white-space:nowrap; text-overflow:elipsis; overflow:hidden;' value='" . $rowResultados['ano'] . "|" . $rowResultados['noinforme'] . "|" . $rowResultados['boriginal'] . "|" . $rowResultados['organo'] . "|" . $rowResultados['paciente'] . "|" . $rowResultados['hospital'] . "|" . $rowResultados['diagnostico'] . "'>" . strtoupper($rowResultados['paciente'] . " (CR" . $rowResultados['ano'] . $rowResultados['noinforme'] . ", " . $rowResultados['boriginal']) . ")</option>";
                                         }
                                         ?>
                                     </select>

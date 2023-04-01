@@ -61,7 +61,7 @@ if (isset($_POST['login'])) {
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<link rel="icon" href="assets/img/favicon.svg">
-	<title>Informes Biopsias</title>
+	<title>Resultados de Biopsias</title>
 
 	<link href="assets/css/bootstrap.css" rel="stylesheet" media="screen">
 	<link href="assets/css/fontawesome.css" rel="stylesheet" media="screen">
@@ -94,7 +94,7 @@ if (isset($_POST['login'])) {
 				<div class="col" align="center"><i style="font-size:230px" class="fas fa-microscope text-dark"></i></div>
 			</div>
 
-			<div class="fs-3 text-dark">Informes Biopsias, autent&iacute;quese</div>
+			<div class="fs-3 text-dark">Resultados de Biopsias, autent&iacute;quese</div>
 			<div align="center" style="font-size:16px">&nbsp;</div>
 
 			<form name="frmInicio" method="post" action="" class="form-signin">
