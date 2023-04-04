@@ -1,15 +1,12 @@
 <?php
 include("class/security/index.php");
 include("conn/conn.php");
-require 'vendor/php-office/autoload.php';
-require_once 'Vendor/autoload.php';
+require("class/PHPExcel.php");
+require("class/fpdf/fpdf.php");
 
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpWord\TemplateProcessor;
-
-$reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+// create document
+$pdf = new FPDF();
+$pdf->AddPage();
 
 /* Limpiando el directorio de informes anteriores */
 $MENSAJE = "";
@@ -41,47 +38,47 @@ if (isset($_POST["import"])) {
     if (in_array($_FILES["file"]["type"], $allowedFileType)) {
         $archivos = 'import/' . $_FILES['file']['name'];
         move_uploaded_file($_FILES['file']['tmp_name'], $archivos);
-        $spreadsheet = $reader->load($archivos);
-        $spreadsheet->setActiveSheetIndex(0);
-        $numerofila = $spreadsheet->getActiveSheet()->getHighestRow();
-
+        $excel = PHPExcel_IOFactory::load($archivos);
+        $excel->setActiveSheetIndex(0);
+        $numerofila = $excel->setActiveSheetIndex(0)->getHighestRow();
+		$numerofilaok = $numerofila - 2;
         /* Obteniendo los valores de filas en la columna correspondiente */
         for ($i = 0; $i < 26; $i++) {
             $columnLetter = chr($i + 65);
-            switch ($spreadsheet->getActiveSheet()->getCell($columnLetter . '2')->getValue()) {
+            switch ($excel->getActiveSheet()->getCell($columnLetter . '2')->getValue()) {
                 case 'ano':
                     for ($j = 3; $j <= $numerofila; $j++) {
-                        $col_ano[$j] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $j)->getValue();
+                        $col_ano[$j] = $excel->getActiveSheet()->getCell($columnLetter . $j)->getValue();
                     }
                     break;
                 case 'noinforme':
                     for ($k = 3; $k <= $numerofila; $k++) {
-                        $col_noinforme[$k] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $k)->getValue();
+                        $col_noinforme[$k] = $excel->getActiveSheet()->getCell($columnLetter . $k)->getValue();
                     }
                     break;
                 case 'boriginal':
                     for ($l = 3; $l <= $numerofila; $l++) {
-                        $col_boriginal[$l] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $l)->getValue();
+                        $col_boriginal[$l] = $excel->getActiveSheet()->getCell($columnLetter . $i)->getValue();
                     }
                     break;
                 case 'organo':
                     for ($m = 3; $m <= $numerofila; $m++) {
-                        $col_organo[$m] = $spreadsheet->getActiveSheet()->getCell($columnLetter . $m)->getValue();
+                        $col_organo[$m] = $excel->getActiveSheet()->getCell($columnLetter . $m)->getValue();
                     }
                     break;
                 case 'paciente':
                     for ($n = 3; $n <= $numerofila; $n++) {
-                        $col_paciente[$n] = empty($spreadsheet->getActiveSheet()->getCell($columnLetter . $n)->getValue()) ? "SIN NOMBRE DE PACIENTE" : $spreadsheet->getActiveSheet()->getCell($columnLetter . $n)->getValue();
+                        $col_paciente[$n] = empty($excel->getActiveSheet()->getCell($columnLetter . $n)->getValue()) ? "SIN NOMBRE DE PACIENTE" : $excel->getActiveSheet()->getCell($columnLetter . $n)->getValue();
                     }
                     break;
                 case 'hospital':
                     for ($o = 3; $o <= $numerofila; $o++) {
-                        $col_hospital[$o] = empty($spreadsheet->getActiveSheet()->getCell($columnLetter . $o)->getValue()) ? "SIN HOSPITAL DEFINIDO" : $spreadsheet->getActiveSheet()->getCell($columnLetter . $o)->getValue();
+                        $col_hospital[$o] = empty($excel->getActiveSheet()->getCell($columnLetter . $o)->getValue()) ? "SIN HOSPITAL DEFINIDO" : $excel->getActiveSheet()->getCell($columnLetter . $o)->getValue();
                     }
                     break;
                 case 'diagnostico':
                     for ($p = 3; $p <= $numerofila; $p++) {
-                        $col_diagnostico[$p] = empty($spreadsheet->getActiveSheet()->getCell($columnLetter . $p)->getValue()) ? "SIN DIAGNOSTICO DEFINIDO" : $spreadsheet->getActiveSheet()->getCell($columnLetter . $p)->getValue();
+                        $col_diagnostico[$p] = empty($excel->getActiveSheet()->getCell($columnLetter . $p)->getValue()) ? "SIN DIAGNOSTICO DEFINIDO" : $excel->getActiveSheet()->getCell($columnLetter . $p)->getValue();
                     }
                     break;
             }
@@ -98,7 +95,7 @@ if (isset($_POST["import"])) {
                 $CUENTA_AGREGADOS++;
             }
         }
-        $MENSAJE = "<div class='alert alert-success alert-dismissible fade show' role='alert'><strong>¡Correcto!</strong>&nbsp;Excel procesado satisfactoriamente: " . $CUENTA_AGREGADOS . ' registros agregados de ' . $numerofila - 2 . "</div>";
+        $MENSAJE = "<div class='alert alert-success alert-dismissible fade show' role='alert'><strong>¡Correcto!</strong>&nbsp;Excel procesado satisfactoriamente: $CUENTA_AGREGADOS registros agregados de $numerofilaok</div>";
     } else {
         $MENSAJE = "<div class='alert alert-warning alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;No ha seleccionado un archivo Excel con extensi&oacute;n XLSX. Por favor vuelva a intentarlo</div>";
     }
@@ -106,17 +103,6 @@ if (isset($_POST["import"])) {
 
 /* Procedimiento para exportar paciente a Word */
 if (isset($_POST["export"])) {
-    /* Limpiando directorio Exports */
-    $DIRECTORIO = "exports/";
-    $HANDLE = opendir($DIRECTORIO);
-    while ($FILE = readdir($HANDLE)) {
-        if ($FILE != "." && $FILE != ".." && $FILE != ".htaccess" && $FILE != ".gitkeep") {
-            unlink($DIRECTORIO . $FILE);
-        }
-    }
-
-    $templateWord = new TemplateProcessor(dirname(__FILE__) . "/template/template.docx");
-
     /* Obtenemos valores de las variables */
     $PACIENTE   = mysqli_real_escape_string($mysqli, (strip_tags(strtoupper($_POST["cboPaciente"]), ENT_QUOTES)));
     $pieces = explode("|", $PACIENTE);
@@ -128,34 +114,44 @@ if (isset($_POST["export"])) {
     $piece_hospital     = strlen($pieces['5']) > 0 ? $pieces['5'] : "-";
     $piece_diagnostico  = $pieces['6'];
 
-    /* Asignamos valores de las variables a la plantilla */
-    $templateWord->setValue("biopsia_numero", "CR" . $piece_ano . $piece_noinforme);
-    $templateWord->setValue("biopsia_original", $piece_boriginal);
-    $templateWord->setValue("organo", $piece_organo);
-    $templateWord->setValue("nombre_paciente", $piece_paciente);
-    $templateWord->setValue("hospital", $piece_hospital);
-    $templateWord->setValue("diagnostico", $piece_diagnostico);
+	// config document
+	$pdf->SetTitle('Nombre');
+	$pdf->SetAuthor('AZUfre, Computer Solutions');
+	$pdf->SetCreator('FPDF Maker');
 
-    $templateWord->saveAs("exports/" . $piece_paciente . ".docx");
+	// add image
+	$pdf->Image('assets/img/logo.png', null, null, '', '', '','','C');
+	$pdf->Ln(10);
 
-    /* Guardamos el documento */
-    if (file_exists("exports/" . $piece_paciente . ".docx")) {
-        header("Content-Description: File Transfer");
-        header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        header("Content-Disposition: attachment; filename=" . basename("exports/" . $piece_paciente . ".docx"));
-        header("Content-Transfer-Encoding: binary");
-        header("Expires: 0");
-        header("Cache-Control: must-revalidate");
-        header("Pragma: public");
-        header("Content-Length: " . filesize("exports/" . $piece_paciente . ".docx"));
-        ob_clean();
-        flush();
-        readfile("exports/" . $piece_paciente . ".docx");
-        exit;
-    } else {
-        echo "Informe no disponible";
-    }
-}
+	// add encabezado
+	$pdf->SetFont('Arial', '', 14);
+	$pdf->Cell(0, 10, utf8_decode('INFORME ANATOMOPATOLÓGICO'), 0, 1, 'C');
+	$pdf->Ln(15);
+
+	// add title
+	$pdf->SetFont('Arial', 'B', 11);
+	$pdf->Cell(0, 6, 'Informe enviado desde:', 0, 1);
+	$pdf->SetFont('Arial', '', 11);
+	$pdf->Cell(0, 5, utf8_decode('Hospital Clínico Quirúrgico Hermanos Ameijeiras'), 0, 1);
+	$pdf->Cell(0, 5, utf8_decode('Centro Nacional De Referencia De Anatomía Patológica'), 0, 1);
+	$pdf->Cell(0, 5, utf8_decode('San Lázaro 701, La Habana 3, Telef: 78761630'), 0, 1);
+	$pdf->Cell(0, 5, utf8_decode('Email: cenrap@hha.sld.uu / telepatol@hha.sld.cu'), 0, 1);
+
+	$pdf->Ln(16);
+
+	$pdf->SetFont('Arial', '', 12);
+	$pdf->Cell(0, 5, utf8_decode('BIOPSIA Nro.: ' . "CR" . $piece_ano . $piece_noinforme), 0, 1);
+	$pdf->Cell(0, 5, utf8_decode('BIOPSIA ORIGINAL: ' . $piece_boriginal), 0, 1);
+	$pdf->Cell(0, 5, utf8_decode('ORGANO: ' . $piece_organo), 0, 1);
+	$pdf->Cell(0, 5, utf8_decode('NOMBRE DEL PACIENTE: ' . $piece_paciente), 0, 1);
+	$pdf->Cell(0, 5, utf8_decode('HOSPITAL: ' . $piece_hospital), 0, 1);
+	$pdf->Ln(4);
+	$pdf->Cell(0, 5, utf8_decode('DIAGNOSTICO: '), 0, 1);
+	$pdf->MultiCell(0, 5, utf8_decode($piece_diagnostico), 0, 1);
+
+	// output file
+	$pdf->Output(utf8_decode($piece_paciente). '.pdf', 'D');
+	}
 ?>
 
 <!DOCTYPE html>
@@ -175,7 +171,7 @@ if (isset($_POST["export"])) {
     <link href="assets/css/fontawesome.css" rel="stylesheet" media="screen">
     <!-- Enlazando el CSS de Bootstrap -->
     <!-- Opcional: enlazando el JavaScript de Bootstrap -->
-    <script src="assets/js/jquery-3.6.4.js"></script>
+    <script src="assets/js/jquery-3.6.0.js"></script>
     <script src="assets/js/popper.js"></script>
     <script src="assets/js/bootstrap.js"></script>
     <script src="assets/js/fontawesome.js"></script>
@@ -185,10 +181,8 @@ if (isset($_POST["export"])) {
         window.setTimeout(function() {
             $(".alert").fadeTo(500, 0).slideUp(500, function() {
                 $(this).remove();
-                window.location.href='/';
             });
         }, 3000);
-        
     </script>
 </head>
 
@@ -204,7 +198,7 @@ if (isset($_POST["export"])) {
                     <div align="center" style="font-size:10px">&nbsp;</div>
                     <div align="center"><i class="fas fa-file-excel fa-6x text-success"></i></div>
                     <div align="center" style="font-size:10px">&nbsp;</div>
-                    <div align="center" class="text-success" style="font-size:22px">Secci&oacute;n para importar BD en Excel</div>
+                    <div align="center" class="text-success" style="font-size:22px">Importar BD en Excel</div>
                     <div align="center" style="font-size:2px">&nbsp;</div>
                     <div class="card-body">
                         <form action='' method='post' name='frmExcelImport' id='frmExcelImport' enctype='multipart/form-data'>
@@ -224,9 +218,9 @@ if (isset($_POST["export"])) {
             <div class="col-md-6">
                 <div class="card bg-primary-30 border-primary mb-3">
                     <div align="center" style="font-size:10px">&nbsp;</div>
-                    <div align="center"><i class="fas fa-file-word fa-6x text-primary"></i></div>
+                    <div align="center"><i class="fas fa-file-pdf fa-6x text-primary"></i></div>
                     <div align="center" style="font-size:10px">&nbsp;</div>
-                    <div align="center" class="text-primary" style="font-size:22px">Secci&oacute;n para exportar Resultados a Word</div>
+                    <div align="center" class="text-primary" style="font-size:22px">Exportar resultados a PDF</div>
                     <div align="center" style="font-size:2px">&nbsp;</div>
                     <div class="card-body">
                         <form action='' method='post' name='frmExcelGenerateWord' id='frmExcelGenerateWord' enctype='multipart/form-data'>
@@ -242,7 +236,7 @@ if (isset($_POST["export"])) {
                                     </select>
                                 </div>
                                 <div class='col-md-4'>
-                                    <button type='submit' id='submit' name='export' class='btn btn-primary w-100'><i class='fas fa-file-import'></i>&nbsp;&nbsp;Exportar Word</button>
+                                    <button type='submit' id='submit' name='export' class='btn btn-primary w-100'><i class='fas fa-file-import'></i>&nbsp;&nbsp;Exportar PDF</button>
                                 </div>
                             </div>
                         </form>
