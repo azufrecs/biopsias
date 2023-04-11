@@ -4,14 +4,14 @@ $MENSAJE = "";
 
 // Inicio del procedimiento de autenticacion
 if (isset($_POST['login'])) {
-	$ldap_host 		= "172.30.1.2";									// IP de Servidor del dominio
+	$ldap_host 		= "192.168.40.2";									// IP de Servidor del dominio
 	$ldap_port 		= "389";										// Puerto LDAP del Servidor de dominio
-	$ldap_domain 	= "@cmw.smcsalud.cu";							// Dominio de red
+	$ldap_domain 	= "@onco.cmw.sld.cu";							// Dominio de red
 	$user 			= $_POST['txtLoginUsername'];					// Nombre de usuario capturado
 	$user_full 		= $_POST['txtLoginUsername'] . $ldap_domain;	// Nombre de usuario capturado con dominio
 	$pswd 			= $_POST['txtPassUsername'];					// Contraseña capturada
-	$base_dn 		= "OU=USUARIOS,DC=cmw,DC=smcsalud,DC=cu";		// Unidad Organizativa de los usuarios del dominio
-	$base_group 	= "CN=PARTE,DC=cmw,DC=smcsalud,DC=cu";			// Grupo en el cual se va a buscar al usuario capturado
+	$base_dn 		= "OU=USUARIOS,DC=onco,DC=cmw,DC=sld,DC=cu";		// Unidad Organizativa de los usuarios del dominio
+	$base_group 	= "CN=BIOPSIAS,DC=onco,DC=cmw,DC=sld,DC=cu";			// Grupo en el cual se va a buscar al usuario capturado
 
 	if ($fp = @fsockopen($ldap_host, $ldap_port, $ERROR_NO, $ERROR_STR, (float)0.5)) {
 		fclose($fp);

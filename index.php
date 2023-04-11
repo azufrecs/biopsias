@@ -58,7 +58,7 @@ if (isset($_POST["import"])) {
                     break;
                 case 'boriginal':
                     for ($l = 3; $l <= $numerofila; $l++) {
-                        $col_boriginal[$l] = $excel->getActiveSheet()->getCell($columnLetter . $i)->getValue();
+                        $col_boriginal[$l] = $excel->getActiveSheet()->getCell($columnLetter . $l)->getValue();
                     }
                     break;
                 case 'organo':
@@ -99,6 +99,7 @@ if (isset($_POST["import"])) {
     } else {
         $MENSAJE = "<div class='alert alert-warning alert-dismissible fade show' role='alert'><strong>¡Error!</strong>&nbsp;No ha seleccionado un archivo Excel con extensi&oacute;n XLSX. Por favor vuelva a intentarlo</div>";
     }
+	$archivos = "";
 }
 
 /* Procedimiento para exportar paciente a Word */
@@ -181,8 +182,9 @@ if (isset($_POST["export"])) {
         window.setTimeout(function() {
             $(".alert").fadeTo(500, 0).slideUp(500, function() {
                 $(this).remove();
+				window.location.href='/';
             });
-        }, 3000);
+        }, 2500);
     </script>
 </head>
 
