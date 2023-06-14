@@ -84,6 +84,7 @@ if (isset($_POST["import"])) {
             }
         }
 
+		$query_truncate_tbl_biopsias = $mysqli->query("TRUNCATE TABLE tbl_biopsias");
         /* Escribiendo en la BD los arrays en el orden correspondiente */
         for ($q = 3; $q <= $numerofila; $q++) {
             $check = mysqli_query($mysqli, "SELECT * FROM tbl_biopsias WHERE ano = '$col_ano[$q]' AND noinforme = '$col_noinforme[$q]' AND boriginal = '$col_boriginal[$q]' AND organo = '$col_organo[$q]' AND paciente = '$col_paciente[$q]' AND hospital = '$col_hospital[$q]' AND diagnostico = '$col_diagnostico[$q]'");
